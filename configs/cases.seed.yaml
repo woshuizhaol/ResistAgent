@@ -1,0 +1,38 @@
+set_d:
+  - case_id: egfr_erlotinib
+    target_name: EGFR
+    target_domain: kinase
+    uniprot_id: P00533
+    drug_name: Erlotinib
+    tissue_type: Lung
+    evaluation_unit: site
+  - case_id: abl1_nilotinib
+    target_name: ABL1
+    target_domain: kinase
+    uniprot_id: P00519
+    drug_name: Nilotinib
+    tissue_type: Leukemia
+    evaluation_unit: site
+  - case_id: hiv_rt_rilpivirine
+    target_name: HIV-1 RT
+    target_domain: RT
+    uniprot_id: P03366
+    drug_name: Rilpivirine
+    tissue_type: NA
+    evaluation_unit: observed_combo
+    hiv_binding_mode: NNRTI_holo_only
+    nnrti_template_pdb: 1RTD
+
+set_n:
+  - case_id: egfr_1m17_erlotinib
+    pdb_id: 1M17
+    target_name: EGFR
+    drug_name: Erlotinib
+  - case_id: abl_1iep_imatinib
+    pdb_id: 1IEP
+    target_name: ABL
+    drug_name: Imatinib
+  - case_id: mpro_7tll_nirmatrelvir
+    pdb_id: 7TLL
+    target_name: SARS-CoV-2 Mpro
+    drug_name: Nirmatrelvir

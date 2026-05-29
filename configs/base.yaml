@@ -1,0 +1,803 @@
+project:
+  name: ResistAgent
+  id: system_bootstrap
+
+outputs:
+  root: outputs
+  stage_dirs:
+    - stage0
+    - stage1
+    - stage2
+    - stage3
+    - stage4
+    - stage5
+    - stage6
+    - stage7
+    - stage8
+    - stage9
+
+resources:
+  max_workers: 12
+  default_cpu_threads: 4
+  max_cpu_threads_per_job: 4
+  gpu_slots: 1
+
+stage0:
+  data_root: data
+  file_manifest: outputs/file_manifest.txt
+  data_audit: outputs/data_audit.json
+  system_audit: outputs/system_audit.json
+  alias_map: outputs/name_alias_map.yaml
+  archive_magic_report: outputs/archive_magic_report.tsv
+  archive_index: outputs/archive_index.sqlite
+  structure_cache_root: outputs/structures/cache
+  structure_raw_root: outputs/structures/raw
+  project_state_root: outputs/system_bootstrap
+  validation_report: outputs/system_bootstrap/stage0/qc/schema_validation.json
+  compute_md5: false
+  md5_max_bytes: 104857600
+  ignore_prefixes:
+    - "._"
+
+stage1:
+  tables_root: outputs/tables
+  mdrdb_main: data/MdrDB/MdrDB_release_v1.0.2022.tsv
+  mdrdb_drug_annotation_zip: data/MdrDB/MdrDB_drug_annotation_v1.0.2022.tsv.zip
+  mdrdb_protein_annotation_zip: data/MdrDB/MdrDB_protein_annotation_v1.0.2022.tsv.zip
+  depmap_mutations_csv: data/DepMap (Cancer Dependency Map)/OmicsSomaticMutations.csv
+  depmap_model_csv: data/DepMap (Cancer Dependency Map)/Model.csv
+  cosmic_resistance_tar: data/COSMIC/ResistanceMutations/Cosmic_ResistanceMutations_Tsv_v103_GRCh38.tar
+  cosmic_cgc_tar: data/COSMIC/CancerGeneCensus/Cosmic_CancerGeneCensus_Tsv_v103_GRCh38.tar
+  hiv_rt_raw: data/external/hivdb/raw/RT.txt
+  hiv_pr_raw: data/external/hivdb/raw/PR.txt
+  hiv_in_raw: data/external/hivdb/raw/IN.txt
+  hiv_ref_raw: data/external/hivdb/raw/Ref.txt
+  uniprot_gene_cache: data/external/uniprot/raw/uniprot_gene_map.tsv
+  hiv_prevalence_cache_tsv: data/external/hiv_prevalence.tsv
+  hiv_drug_selected_cache_tsv: data/external/hiv_mutations_by_drug.tsv
+  master_table: outputs/tables/master_mutation_table.parquet
+  master_schema: outputs/tables/master_mutation_table.schema.json
+  mutation_frequency_map: outputs/tables/mutation_frequency_map.parquet
+  mutation_combination_map: outputs/tables/mutation_combination_map.parquet
+  hiv_prevalence_prior: outputs/tables/hiv_prevalence_prior.parquet
+  hiv_drug_selected_prior: outputs/tables/hiv_drug_selected_prior.parquet
+  background_prior: outputs/tables/background_prior.parquet
+  background_prior_by_tissue: outputs/tables/background_prior_by_tissue.parquet
+  drug_selected_prior: outputs/tables/drug_selected_prior.parquet
+  observed_combo_prior: outputs/tables/observed_combo_prior.parquet
+  global_prior: outputs/tables/global_prior.parquet
+  benchmark_prior_blind: outputs/tables/benchmark_prior_blind.parquet
+  stage1_build_qc: outputs/tables/stage1_build_tables_qc.json
+  hiv_prior_qc: outputs/tables/hiv_prior_qc.json
+  mutation_prior_qc: outputs/tables/mutation_prior_qc.json
+  mdrdb_chunksize: 20000
+  cosmic_chunksize: 20000
+  depmap_chunksize: 200000
+  tissue_min_denominator: 50
+  tissue_aliases:
+    Leukemia:
+      - Myeloid
+      - Lymphoid
+  epsilon_background: 1.0e-5
+
+stage1_5:
+  projects_root: configs/public_projects
+  summary_report: outputs/stage1_5/fetch_summary.json
+  rcsb_cache_root: outputs/stage1_5/rcsb_cache
+  alphafold_cache_root: outputs/stage1_5/alphafold_cache
+  uniprot_cache_root: outputs/stage1_5/uniprot_cache
+  pubchem_cache_root: outputs/stage1_5/pubchem_cache
+  modeling_request_root: outputs/stage1_5/modeling_requests
+  request_timeout_sec: 60
+  min_chain_completeness: 0.7
+  min_ligand_heavy_atoms: 6
+
+stage2:
+  cases_seed_config: configs/cases.seed.yaml
+  cases_frozen_config: configs/cases.yaml
+  manifests_root: outputs/case_manifests
+  rcsb_cache_root: outputs/case_manifests/rcsb_cache
+  domain_filter_report: outputs/case_manifests/domain_filter_report.csv
+  rt_domain_extraction_report: outputs/case_manifests/RT_domain_extraction_report.csv
+  rt_pocket_similarity_report: outputs/case_manifests/rt_pocket_similarity_report.csv
+  hiv_nnrti_structure_qc: outputs/case_manifests/hiv_nnrti_structure_qc.csv
+  combo_panel: outputs/case_manifests/combo_panel.csv
+  site_pool_report: outputs/case_manifests/site_pool.csv
+  mutation_pool_report: outputs/case_manifests/mutation_pool.csv
+  case_selection_qc: outputs/case_manifests/case_selection_qc.json
+  seed_pdb_top_n: 20
+  hiv_seed_pdb_top_n: 40
+  top_risk_n: 20
+  medium_risk_n: 80
+  tail_n: 100
+  top_combo_n: 20
+  combo_min_support: 5
+  representative_samples_per_site: 1
+  request_timeout_sec: 60
+  hiv_pocket_positions:
+    - 101
+    - 138
+    - 181
+    - 188
+    - 190
+    - 227
+  hiv_domain_min_identity: 0.7
+  hiv_domain_min_query_coverage: 0.5
+  hiv_domain_min_effective_score: 0.35
+  hiv_rt_keywords:
+    - reverse transcriptase
+    - p66
+    - p51
+    - rt
+  hiv_exclude_keywords:
+    - protease
+    - integrase
+  hiv_nnrti_aliases:
+    - rilpivirine
+    - etravirine
+    - efavirenz
+    - delavirdine
+    - nevirapine
+    - doravirine
+    - dapivirine
+    - tmc278
+    - tmc125
+    - non-nucleoside
+    - nnrti
+
+stage3:
+  extract_lists_root: outputs/extract_lists
+  structures_root: outputs/structures
+  sample_cache_root: outputs/structures/cache
+  sample_raw_root: outputs/structures/raw
+  set_n_external_root: outputs/external_test_set
+  set_n_attempt_report: outputs/external_test_set/set_n_attempt_report.csv
+  extraction_source_report: outputs/structures/extraction_source_report.csv
+  missing_samples_report: outputs/structures/missing_samples.csv
+  modeling_queue_report: outputs/structures/modeling_queue.csv
+  excluded_samples_report: outputs/structures/excluded_samples.csv
+  extraction_qc: outputs/structures/stage3_extraction_qc.json
+  sample_search_roots:
+    - data/MdrDB/samples
+    - data/MdrDB/extracted_full
+  required_roles:
+    - WT
+    - MT
+    - ligand
+  optional_roles:
+    - WT_complex
+    - MT_complex
+  archive_extractable_types:
+    - Single Substitution
+    - Multiple Substitution
+    - Multiple Complex
+  modeling_queue_types:
+    - Deletion
+    - Insertion
+    - Indel
+  extract_list_names:
+    egfr_erlotinib: egfr.txt
+    abl1_nilotinib: abl1.txt
+    hiv_rt_rilpivirine: hiv.txt
+  missing_rate_threshold: 0.005
+
+stage3_2:
+  outputs_root: outputs
+  sifts_chain_uniprot_tsv: data/external/sifts/raw/pdb_chain_uniprot.tsv.gz
+  sifts_observed_segments_tsv: data/external/sifts/raw/uniprot_segments_observed.tsv.gz
+  sifts_pdbe_mapping_root: data/external/sifts/pdbe_mappings
+  alignment_min_identity: 0.5
+  pocket_contact_distance_a: 6.0
+  pocket_coverage_threshold: 0.95
+  hiv_sentinel_positions:
+    - 101
+    - 138
+    - 181
+    - 188
+    - 190
+    - 227
+
+stage3_5:
+  summary_report: outputs/stage3_5/stage3_5_qc.json
+  default_box_size_a: 22.0
+  ligand_box_padding_a: 8.0
+  box_expansion_step_a: 4.0
+  max_redocking_attempts: 2
+  bridge_water_distance_a: 3.5
+  bridge_water_bfactor_max: 40.0
+  cofactor_distance_a: 4.0
+  protein_prep_ph: 7.4
+  vina_exhaustiveness: 8
+  vina_num_modes: 9
+  vina_energy_range: 3
+  cpu_threads: 4
+  crystal_redocking_seeds:
+    - 11
+    - 23
+    - 37
+    - 41
+    - 53
+  noncrystal_redocking_seeds:
+    - 101
+    - 103
+    - 107
+    - 109
+    - 113
+    - 127
+    - 131
+    - 137
+    - 139
+    - 149
+    - 151
+    - 157
+    - 163
+    - 167
+    - 173
+    - 179
+    - 181
+    - 191
+    - 193
+    - 197
+  crystal_rmsd_threshold_a: 2.0
+  crystal_min_consensus_seeds: 2
+  anchor_frequency_threshold: 0.6
+  hiv_reference_holo_pdb: 2ZD1
+  hiv_reference_holo_chain: A
+  hiv_pose_contact_cutoff_a: 6.0
+  hiv_partner_chain_contact_cutoff_a: 6.0
+  hiv_required_pose_label: NNRTI_pocket
+  hiv_min_nnrti_seed_count: 3
+
+stage4:
+  summary_report: outputs/stage4/stage4_qc.json
+  default_box_size_a: 22.0
+  ligand_box_padding_a: 8.0
+  pocket_distance_a: 6.0
+  second_shell_distance_a: 10.0
+  protein_prep_ph: 7.4
+  use_pdbfixer: true
+  quick_docking_seeds:
+    - 11
+    - 37
+    - 53
+  vina_exhaustiveness: 8
+  vina_num_modes: 9
+  vina_energy_range: 3
+  vina_cpu_threads: 1
+  max_parallel_jobs: 24
+  proxy_retry_limit: 2
+  proxy_box_expansion_step_a: 2.0
+  local_rmsd_radius_a: 8.0
+  top_k: 20
+  epsilon_background: 1.0e-5
+  agent_temperature: 0.2
+  agent_thinking: enabled
+  agent_max_tokens: 2200
+  agent_top_site_n: 8
+  agent_top_combo_n: 5
+  agent_top_residue_n: 6
+
+stage5:
+  summary_report: outputs/stage5/stage5_qc.json
+  site_top_n: 8
+  combo_top_n: 5
+  model_missing_structures: true
+  default_box_size_a: 22.0
+  ligand_box_padding_a: 8.0
+  box_expansion_step_a: 2.0
+  max_redocking_attempts: 2
+  protein_prep_ph: 7.4
+  use_pdbfixer: true
+  vina_seeds:
+    - 11
+    - 23
+    - 37
+    - 53
+    - 71
+  vina_exhaustiveness: 12
+  vina_num_modes: 9
+  vina_energy_range: 4
+  vina_cpu_threads: 4
+  max_parallel_jobs: 24
+  pocket_contact_distance_a: 6.0
+  polar_contact_distance_a: 4.0
+  solvent_exposure_neighbor_threshold: 2
+  anchor_loss_threshold: 0.25
+  steric_clash_delta_dock_threshold: 1.0
+  pocket_volume_change_threshold: 0.12
+  solvent_proxy_shift_threshold: 0.15
+  local_rmsd_threshold_a: 0.8
+  local_sampling_enabled: true
+  local_sampling_ns: 0.2
+  local_sampling_rmsd_trigger_a: 0.8
+  local_sampling_component_count_trigger: 2
+  local_sampling_backbone_restraint_kcal_mol_a2: 1.0
+  local_sampling_gpu_ids:
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+  mmgbsa_igb: 8
+  mmgbsa_saltcon: 0.15
+  mmgbsa_frame_interval: 1
+  mmgbsa_use_sander: true
+  mmgbsa_max_parallel_jobs: 12
+  require_gnina_for_stage5_scoring: true
+  multi_score_neutral_threshold_kcal_mol: 0.25
+  multi_score_consensus_threshold: 0.70
+  hiv_pose_contact_cutoff_a: 6.0
+  hiv_required_pose_label: NNRTI_pocket
+  calibration_min_points: 2
+  agent_temperature: 0.2
+  agent_thinking: enabled
+  agent_max_tokens: 2400
+  agent_top_site_n: 6
+  agent_top_combo_n: 5
+  case_overrides:
+    egfr_erlotinib:
+      site_top_n: 27
+      combo_top_n: 3
+    hiv_rt_rilpivirine:
+      site_top_n: 20
+      combo_top_n: 20
+    abl1_nilotinib:
+      site_top_n: 25
+
+stage6:
+  summary_report: outputs/stage6/stage6_qc.json
+  fitness_formula_version: resistagent_default_v1
+  site_panel_top_n: 20
+  combo_panel_top_n: 20
+  site_panel_risk_coverage: 0.80
+  combo_panel_risk_coverage: 0.80
+  site_panel_min_n: 6
+  site_panel_max_n: 20
+  combo_panel_min_n: 5
+  combo_panel_max_n: 20
+  combo_reward_weight_floor: 0.6
+  panel_weight_temperature: 0.7
+  panel_weight_eps: 1.0e-6
+  proposal_count: 48
+  beam_width: 12
+  max_proposals_per_pattern: 2
+  max_proposals_per_family: 3
+  max_rounds: 16
+  early_stop_rounds: 3
+  objective_execution_order:
+    - robust
+    - naive
+  exploration_rounds: 6
+  exploration_temperature: 0.7
+  exploitation_temperature: 0.25
+  agent_max_tokens: 2600
+  agent_thinking: enabled
+  max_parallel_candidates: 14
+  target_parallel_workers: 4
+  default_box_size_a: 22.0
+  ligand_box_padding_a: 8.0
+  protein_prep_ph: 7.4
+  use_pdbfixer: true
+  vina_seeds:
+    - 11
+    - 23
+    - 37
+  vina_exhaustiveness: 8
+  vina_num_modes: 5
+  vina_energy_range: 3
+  vina_cpu_threads: 1
+  hiv_pose_contact_cutoff_a: 6.0
+  hiv_required_pose_label: NNRTI_pocket
+  binding_score_scale_kcal_mol: 1.5
+  cvar_tail_fraction: 0.2
+  panel_min_coverage: 0.80
+  high_uncertainty_coverage: 0.95
+  coverage_penalty: 0.25
+  keep_ifp_penalty: 0.20
+  compensation_penalty: 0.10
+  hotspot_drop_penalty: 0.15
+  keep_ifp_min: 0.5
+  min_anchor_count: 1
+  wt_hard_constraint_epsilon_kcal_mol: 0.5
+  uncertainty_heavy_dock_mmgbsa_threshold: 0.6
+  uncertainty_heavy_site_panel_max_n: 12
+  uncertainty_heavy_combo_panel_max_n: 8
+  uncertainty_heavy_rerank_top_n: 12
+  uncertainty_heavy_gnina_weight: 0.15
+  uncertainty_heavy_raw_docking_floor: true
+  calibrator_min_rows: 4
+  calibrator_min_unique_targets: 3
+  calibrator_min_rows_for_isotonic: 6
+  calibrator_huber_epsilon: 1.35
+  calibrator_huber_alpha: 1.0e-4
+  oracle_v2_min_rows: 6
+  oracle_v2_min_unique_targets: 4
+  oracle_v2_min_rows_for_isotonic: 8
+  oracle_v2_huber_epsilon: 1.35
+  oracle_v2_huber_alpha: 1.0e-4
+  oracle_v2_output_dirname: stage6_oracle_v2
+  oracle_v2_normal_trust_min: 0.60
+  oracle_v2_uncertainty_trust_min: 0.45
+  oracle_v2_conservative_residual_weight: 1.0
+  allow_hypothesis_only_stage6_search: false
+  receptor_ensemble_enabled: false
+  receptor_ensemble_min_members: 2
+  receptor_ensemble_max_members: 4
+  receptor_ensemble_aggregate: median
+  cross_objective_seed_injection: {}
+  required_numeric_features:
+    - delta_gnina_affinity_kcal_mol
+  transform_prior_use_history: false
+  transform_prior_history_top_n: 25
+  transform_prior_pdbbind_root: data/PDBbind/extracted/P-L
+  transform_prior_pdbbind_scan_limit: 240
+  transform_prior_pdbbind_top_k: 24
+  transform_prior_pdbbind_similarity_min: 0.35
+  failure_context_top_n: 5
+  proposal_transform_prior_weight: 10.0
+  dynamic_hotspot_fraction_trigger: 0.45
+  dynamic_new_nonhotspot_min: 1.0
+  proposal_diversity_enabled: true
+  proposal_diversity_apply_to_naive: false
+  proposal_beam_scaffold_repeat_penalty: 0.15
+  proposal_scaffold_repeat_penalty: 0.25
+  proposal_family_repeat_penalty: 0.10
+  proposal_parent_repeat_penalty: 0.08
+  proposal_scaffold_novelty_bonus: 0.08
+  proposal_family_novelty_bonus: 0.04
+  proposal_template_family_coverage_count: 0
+  proposal_relaxed_max_per_family: 3
+  proposal_relaxed_max_per_scaffold: 2
+  proposal_relaxed_max_per_parent: 3
+  max_proposals_per_scaffold: 2
+  max_proposals_per_parent: 3
+  search_beam_diversity_enabled: true
+  search_beam_diversity_apply_to_naive: false
+  search_beam_diversity_lock_top_n: 1
+  search_beam_scaffold_penalty: 0.12
+  search_beam_scaffold_novelty_bonus: 0.05
+  top20_report_n: 20
+  scaffold_diversity_top_n: 50
+  top_k_export: 200
+  reward_weights:
+    alpha: 1.2
+    beta: 0.6
+    eta: 0.4
+    gamma: 0.2
+    delta: 0.3
+  ifp_type_weights:
+    metal_complex: 1.4
+    salt_bridge: 1.3
+    hydrogen_bond: 1.0
+    pi_cation: 0.9
+    pi_stacking: 0.8
+    hydrophobic: 0.6
+  prefilter:
+    qed_min: 0.35
+    sa_max: 6.5
+    ra_score_min: 0.30
+    scscore_max: 4.5
+    retrosynthesis_plausibility_min: 0.30
+    series_likeness_min: 0.25
+    medchem_blacklist_hard_fail: true
+    unstable_motif_hard_fail: false
+    clogp_min: -0.5
+    clogp_max: 5.5
+    hbd_max: 6
+    hba_max: 12
+    tpsa_max: 160.0
+    mw_max: 650.0
+    rotatable_bonds_max: 14
+    baseline_tolerance:
+      qed_drop: 0.03
+      sa_increase: 0.5
+      clogp_decrease: 0.4
+      clogp_increase: 0.4
+      hbd_increase: 1
+      hba_increase: 1
+      tpsa_increase: 15.0
+      mw_increase: 60.0
+      rotatable_bonds_increase: 2
+  fragment_library:
+    add:
+      - F
+      - Cl
+      - Br
+      - C
+      - OC
+      - O
+      - N
+      - C#N
+    replace:
+      - F
+      - Cl
+      - Br
+      - C
+      - OC
+      - O
+      - N
+      - C#N
+  dynamics_lite:
+    enabled: false
+    every_n_rounds: 4
+    beam_top_n: 5
+    final_top_n: 5
+    reward_weight: 0.20
+    reward_center: 0.50
+    contact_survival_weight: 0.45
+    occupancy_persistence_weight: 0.30
+    anchor_persistence_weight: 0.25
+    fallback_penalty: 0.05
+    local_sampling_ns: 0.10
+    local_sampling_backbone_restraint_kcal_mol_a2: 1.0
+  case_overrides:
+    abl1_nilotinib:
+      proposal_count: 16
+      beam_width: 6
+      max_rounds: 6
+      max_parallel_candidates: 6
+      uncertainty_heavy_site_panel_max_n: 8
+      wt_hard_constraint_epsilon_kcal_mol: 0.75
+      vina_seeds:
+        - 11
+      receptor_ensemble_enabled: true
+      receptor_ensemble_min_members: 2
+      receptor_ensemble_max_members: 4
+      receptor_ensemble_runtime_max_members: 2
+      receptor_ensemble_aggregate: median
+      objective_execution_order:
+        - naive
+        - robust
+      cross_objective_seed_injection:
+        robust:
+          source_objectives:
+            - naive
+          top_k: 8
+          preserve_lead: true
+          reward_guardrails:
+            enabled: true
+            robust_score_floor_quantile: 0.0
+            s_wt_floor_quantile: 0.0
+            robust_score_penalty_weight: 2.0
+            s_wt_penalty_weight: 2.0
+            disable_compensation_below_floor: true
+      objective_final_rerank:
+        robust:
+          enabled: true
+          dep_ceiling_quantile: 0.5
+          dep_penalty_weight: 2.0
+          scaffold_tail_diversity:
+            enabled: true
+            lock_top_n: 20
+            penalty_weight: 0.2
+    egfr_erlotinib:
+      objective_final_rerank:
+        robust:
+          enabled: true
+          dep_focus:
+            enabled: true
+            lock_top_n: 1
+            apply_top_n: 48
+            dep_ceiling_quantile: 0.35
+            dep_lead_scale: 1.50
+            dep_penalty_weight: 0.40
+            hotspot_fraction_ceiling_quantile: 0.50
+            hotspot_fraction_lead_scale: 1.25
+            hotspot_fraction_penalty_weight: 0.15
+            compensation_bonus_weight: 0.10
+            nonhotspot_bonus_weight: 0.10
+            keep_ifp_nonhotspot_bonus_weight: 0.05
+          scaffold_tail_diversity:
+            enabled: true
+            lock_top_n: 20
+            penalty_weight: 0.15
+    hiv_rt_rilpivirine:
+      combo_reward_weight_floor: 0.6
+      proposal_transform_prior_weight: 12.0
+      proposal_beam_scaffold_repeat_penalty: 0.20
+      proposal_scaffold_repeat_penalty: 0.30
+      proposal_template_family_coverage_count: 4
+      proposal_relaxed_max_per_family: 3
+      proposal_relaxed_max_per_scaffold: 4
+      proposal_relaxed_max_per_parent: 4
+      max_proposals_per_scaffold: 1
+      search_beam_scaffold_penalty: 0.18
+      search_beam_scaffold_novelty_bonus: 0.08
+      objective_final_rerank:
+        robust:
+          enabled: true
+          dep_focus:
+            enabled: true
+            lock_top_n: 1
+            apply_top_n: 48
+            dep_ceiling_quantile: 0.35
+            dep_lead_scale: 1.10
+            dep_penalty_weight: 0.80
+            hotspot_fraction_ceiling_quantile: 0.50
+            hotspot_fraction_lead_scale: 1.10
+            hotspot_fraction_penalty_weight: 0.25
+            compensation_bonus_weight: 0.20
+            nonhotspot_bonus_weight: 0.15
+            keep_ifp_nonhotspot_bonus_weight: 0.10
+          scaffold_tail_diversity:
+            enabled: true
+            lock_top_n: 20
+            penalty_weight: 0.20
+      dynamics_lite:
+        enabled: false
+        every_n_rounds: 4
+        beam_top_n: 5
+        final_top_n: 5
+        reward_weight: 0.20
+
+stage6_5:
+  output_dirname: stage6_5
+  validation_mode: implicit_short_validation
+  validation_note: implicit_short_validation_only__not_explicit_md_main_claim
+  pair_max_workers: 6
+  molecule_parameter_probe_enabled: false
+  molecule_parameter_probe_timeout_sec: 45
+  require_gnina_for_stage5_scoring: false
+  local_sampling_ns: 0.2
+  local_sampling_backbone_restraint_kcal_mol_a2: 1.0
+  trajectory_frame_stride: 4
+  validation_noncombo_high_risk_n: 2
+  validation_noncombo_moderate_n: 1
+  validation_combo_single_high_risk_n: 1
+  validation_combo_topcombo_n: 2
+  energy_top_molecule_n: 5
+  energy_top_target_n: 5
+  distance_top_anchor_n: 3
+  md_summary_target_system: mt
+  qc_report: stage6_5/stage6_5_qc.json
+  case_candidate_overrides:
+    hiv_rt_rilpivirine:
+      blocked_candidate_ids:
+        - bb3a4c09178d
+        - 52fae30cf6a0
+        - dffbda6eb2b2
+        - 4f1ab98d2797
+      preferred_robust_best_candidate_ids:
+        - 2ac81eb4330e
+      preferred_wt_control_candidate_ids:
+        - 281b505c2ed2
+      blocked_energy_candidate_ids:
+        - dffbda6eb2b2
+        - 6d7e6c544f73
+        - 0bc8c332df10
+        - 0e7faad932c1
+        - 776614ccaf69
+      preferred_energy_candidate_ids:
+        - 2ac81eb4330e
+        - 281b505c2ed2
+        - c5a408fe255b
+        - 93dad0df3b6d
+
+stage7:
+  output_dir: outputs/benchmark
+  benchmark_scope: master_mutation_table
+  random_seed: 20260413
+  groupkfold_splits: 5
+  min_group_size: 12
+  leave_one_target_top_n: 12
+  leave_one_drug_top_n: 12
+  external_holdout_datasets:
+    - Platinum
+    - RET
+    - TKI
+  resistant_ddg_threshold: 1.0
+  regression_positive_floor: 0.0
+  precision_at_k:
+    - 5
+    - 10
+  ndcg_at_k:
+    - 5
+    - 10
+  decoy_ddg_max: 0.25
+  decoy_background_max: 0.01
+  decoy_drug_selected_max: 0.01
+  decoy_abs_mut_volume_max: 40.0
+  decoy_abs_net_charge_max: 1.0
+  external_holdout_min_rows: 100
+  source_time_metadata_csv: outputs/tables/source_time_metadata.csv
+  source_time_metadata_summary_json: outputs/tables/source_time_metadata_summary.json
+  time_split_min_train_rows: 2000
+  time_split_min_test_rows: 1000
+  model_variants:
+    default: histgb_regression
+    ours: xgb_dual
+  xgb_dual:
+    reg_n_estimators: 160
+    clf_n_estimators: 140
+    max_depth: 6
+    learning_rate: 0.05
+    subsample: 0.8
+    colsample_bytree: 0.8
+    reg_lambda: 1.0
+    n_jobs: 8
+    rank_score:
+      classifier_weight: 0.75
+      regression_z_weight: 0.15
+      prior_delta_weight: 0.00
+      docking_z_weight: 0.10
+  xgb_dual_struct_ensemble:
+    primary_rank_weight: 0.70
+    structure_aux_weight: 0.30
+  feature_sets:
+    frequency_only:
+      - prior_logit_background
+      - prior_logit_drug_selected
+    background_only:
+      - prior_logit_background
+    docking_proxy_only:
+      - vina
+      - vina1
+      - vina2
+      - vina3
+      - vina4
+    mdrdb_structure_only:
+      - LIG.MolLogP
+      - LIG.MolWt
+      - LIG.TPSA
+      - LIG.NumRotatableBonds
+      - MUT.Volume
+      - MUT.MolWt
+      - MUT.Hydropathy
+      - MUT.NetCharge
+      - ENV.Charge
+      - ENV.NumPolarRes
+      - ENV.NumApolarRes
+      - ENV.NumChargedRes
+      - PLIP.HBOND
+      - PLIP.HYDR
+      - PLIP.SALTB
+      - PLIP.PISTACK
+      - PLIP.PICATION
+      - PLIP.HALOGENB
+      - vina
+    ours:
+      - prior_logit_background
+      - prior_logit_drug_selected
+      - prior_delta
+      - prior_ratio
+      - combination_size
+      - is_single_substitution
+      - is_multiple_substitution
+      - is_deletion_like
+      - has_observed_combo
+      - LIG.MolLogP
+      - LIG.MolWt
+      - LIG.TPSA
+      - LIG.NumRotatableBonds
+      - MUT.Volume
+      - MUT.MolWt
+      - MUT.Hydropathy
+      - MUT.NetCharge
+      - ENV.Charge
+      - ENV.NumPolarRes
+      - ENV.NumApolarRes
+      - ENV.NumChargedRes
+      - PLIP.HBOND
+      - PLIP.HYDR
+      - PLIP.SALTB
+      - PLIP.PISTACK
+      - PLIP.PICATION
+      - PLIP.HALOGENB
+      - vina
+      - fitness_proxy
+  stage6_case_ids:
+    - egfr_erlotinib
+    - hiv_rt_rilpivirine
+    - abl1_nilotinib
+
+workflow:
+  engine: snakemake
+  resources:
+    gpu: 1
+
+llm:
+  model_env: GLM_MODEL
+  base_url_env: GLM_BASE_URL
+  api_key_env: ZHIPU_API_KEY
+  default_temperature: 0.2

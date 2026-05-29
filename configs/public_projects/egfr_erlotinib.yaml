@@ -1,0 +1,6 @@
+project_id: egfr_erlotinib
+target_name: EGFR
+uniprot_id: P00533
+pdb_id: 1M17
+ligand:
+  query_name: Erlotinib

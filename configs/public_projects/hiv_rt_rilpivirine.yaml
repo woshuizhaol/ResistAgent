@@ -1,0 +1,6 @@
+project_id: hiv_rt_rilpivirine
+target_name: HIV-1 RT
+uniprot_id: P03366
+pdb_id: 1RTD
+ligand:
+  query_name: Rilpivirine

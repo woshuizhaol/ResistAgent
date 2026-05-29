@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ResistAgent State",
+  "type": "object",
+  "required": [
+    "project_id",
+    "stage",
+    "inputs",
+    "artifacts",
+    "qc",
+    "software_versions",
+    "seeds",
+    "commands",
+    "llm_decisions"
+  ],
+  "properties": {
+    "project_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stage": {
+      "type": "string",
+      "minLength": 1
+    },
+    "inputs": {
+      "type": "object"
+    },
+    "artifacts": {
+      "type": "object"
+    },
+    "qc": {
+      "type": "object"
+    },
+    "software_versions": {
+      "type": "object"
+    },
+    "seeds": {
+      "type": "object"
+    },
+    "commands": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "llm_decisions": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    }
+  },
+  "additionalProperties": true
+}

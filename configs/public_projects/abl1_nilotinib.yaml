@@ -1,0 +1,6 @@
+project_id: abl1_nilotinib
+target_name: ABL1
+uniprot_id: P00519
+pdb_id: 3CS9
+ligand:
+  query_name: Nilotinib

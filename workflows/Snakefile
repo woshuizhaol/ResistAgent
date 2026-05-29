@@ -1,0 +1,504 @@
+configfile: "configs/base.yaml"
+
+import os
+import sys
+from glob import glob
+
+import yaml
+
+MAX_WORKERS = min(12, max(1, (os.cpu_count() or 1) // 2))
+PROJECT_ID = config["project"]["id"]
+STAGE0 = config["stage0"]
+STAGE1 = config["stage1"]
+STAGE1_5 = config["stage1_5"]
+STAGE2 = config["stage2"]
+STAGE3 = config["stage3"]
+STAGE3_2 = config["stage3_2"]
+STAGE3_5 = config["stage3_5"]
+STAGE4 = config["stage4"]
+PYTHON_BIN = sys.executable
+CASES_SEED_PATH = STAGE2["cases_seed_config"]
+CASES_FROZEN_PATH = STAGE2["cases_frozen_config"]
+
+with open(CASES_SEED_PATH, "r", encoding="utf-8") as handle:
+    CASES_CONFIG = yaml.safe_load(handle) or {}
+
+SET_D_CASE_IDS = [case["case_id"] for case in CASES_CONFIG.get("set_d", [])]
+STAGE1_5_PROJECT_CONFIGS = sorted(glob("configs/public_projects/*.yaml"))
+STAGE1_5_TARGET_JSONS = [f"outputs/{case_id}/stage1_5/meta/target.json" for case_id in SET_D_CASE_IDS]
+CASE_MANIFEST_PATHS = [f"outputs/case_manifests/{case_id}.yaml" for case_id in SET_D_CASE_IDS]
+CASE_SAMPLE_LIST_PATHS = sorted(glob("outputs/case_manifests/*.sample_id_list.txt"))
+STAGE3_2_RESIDUE_MAPS = [f"outputs/{case_id}/stage3_2/residue_map.json" for case_id in SET_D_CASE_IDS]
+STAGE3_2_RESIDUE_QCS = [f"outputs/{case_id}/stage3_2/residue_map_qc.csv" for case_id in SET_D_CASE_IDS]
+STAGE3_2_MUTATION_STATUS = [f"outputs/{case_id}/stage3_2/mutation_site_status.csv" for case_id in SET_D_CASE_IDS]
+STAGE3_2_COMPONENT_STATUS = [f"outputs/{case_id}/stage3_2/component_mutation_status.csv" for case_id in SET_D_CASE_IDS]
+STAGE3_2_HIV_QC = [f"outputs/{case_id}/stage3_2/hiv_rt_numbering_qc.csv" for case_id in SET_D_CASE_IDS]
+STAGE3_2_EXCLUDED = [f"outputs/{case_id}/stage3_2/excluded_samples.csv" for case_id in SET_D_CASE_IDS]
+STAGE3_5_WT_COMPLEX = [f"outputs/{case_id}/stage3_5/wt_complex.pdb" for case_id in SET_D_CASE_IDS]
+STAGE3_5_WT_IFP = [f"outputs/{case_id}/stage3_5/wt_ifp.json" for case_id in SET_D_CASE_IDS]
+STAGE3_5_ANCHORS = [f"outputs/{case_id}/stage3_5/wt_anchor_residues.txt" for case_id in SET_D_CASE_IDS]
+STAGE3_5_POSE_STATS = [f"outputs/{case_id}/stage3_5/wt_pose_stats.csv" for case_id in SET_D_CASE_IDS]
+STAGE3_5_DOCKING_BOX = [f"outputs/{case_id}/stage3_5/docking_box.json" for case_id in SET_D_CASE_IDS]
+STAGE3_5_WATER_REPORT = [f"outputs/{case_id}/stage3_5/water_retention_report.csv" for case_id in SET_D_CASE_IDS]
+STAGE3_5_HIV_QC = [f"outputs/{case_id}/stage3_5/hiv_nnrti_pose_qc.csv" for case_id in SET_D_CASE_IDS]
+STAGE4_MUTATION_RANK = [f"outputs/{case_id}/stage4/mutation_rank.csv" for case_id in SET_D_CASE_IDS]
+STAGE4_RESIDUE_RISK = [f"outputs/{case_id}/stage4/residue_risk.csv" for case_id in SET_D_CASE_IDS]
+STAGE4_STORY = [f"outputs/{case_id}/stage4/mutation_story.md" for case_id in SET_D_CASE_IDS]
+STAGE4_STORY_INPUT = [f"outputs/{case_id}/stage4/mutation_story_input.json" for case_id in SET_D_CASE_IDS]
+STAGE4_STORY_PAYLOAD = [f"outputs/{case_id}/stage4/mutation_story_payload.json" for case_id in SET_D_CASE_IDS]
+STAGE4_CONSERVATION = [f"outputs/{case_id}/stage4/conservation_profile.json" for case_id in SET_D_CASE_IDS]
+STAGE4_COMBO_RANK = [f"outputs/{case_id}/stage4/combo_rank.csv" for case_id in SET_D_CASE_IDS]
+STAGE4_CASE_QC = [f"outputs/{case_id}/stage4/stage4_qc.json" for case_id in SET_D_CASE_IDS]
+STAGE4_CASE_MANIFEST = [f"outputs/{case_id}/run_manifest.json" for case_id in SET_D_CASE_IDS]
+STAGE4_CASE_STATE = [f"outputs/{case_id}/state.json" for case_id in SET_D_CASE_IDS]
+STAGE5_DOCKING = [f"outputs/{case_id}/stage5/docking_scores.csv" for case_id in SET_D_CASE_IDS]
+STAGE5_TARGET_PANEL = [f"outputs/{case_id}/stage5/target_panel.csv" for case_id in SET_D_CASE_IDS]
+STAGE5_HIV_POSE_QC = [f"outputs/{case_id}/stage5/hiv_nnrti_pose_qc.csv" for case_id in SET_D_CASE_IDS]
+STAGE5_IFP_DIFF = [f"outputs/{case_id}/stage5/ifp_diff.csv" for case_id in SET_D_CASE_IDS]
+STAGE5_EFFECTS = [f"outputs/{case_id}/stage5/mutation_effects.json" for case_id in SET_D_CASE_IDS]
+STAGE5_COMBO_EFFECTS = [f"outputs/{case_id}/stage5/combination_effects.json" for case_id in SET_D_CASE_IDS]
+STAGE5_STORY_INPUT = [f"outputs/{case_id}/stage5/effect_story_input.json" for case_id in SET_D_CASE_IDS]
+STAGE5_STORY_PAYLOAD = [f"outputs/{case_id}/stage5/effect_story_payload.json" for case_id in SET_D_CASE_IDS]
+STAGE5_STORY = [f"outputs/{case_id}/stage5/mutation_effect_story.md" for case_id in SET_D_CASE_IDS]
+STAGE5_CASE_QC = [f"outputs/{case_id}/stage5/stage5_qc.json" for case_id in SET_D_CASE_IDS]
+STAGE5_CLUSTERS = "outputs/stage5/mechanism_clusters.csv"
+STAGE5_CALIBRATION = "outputs/stage5/scoring_calibration.csv"
+STAGE5_CALIBRATION_PLOT = "outputs/stage5/scoring_calibration_plot.png"
+
+rule all:
+    input:
+        STAGE0["file_manifest"],
+        STAGE0["data_audit"],
+        STAGE0["system_audit"],
+        STAGE0["alias_map"],
+        STAGE0["archive_magic_report"],
+        STAGE0["archive_index"],
+        f"outputs/{PROJECT_ID}/run_manifest.json",
+        f"outputs/{PROJECT_ID}/state.json",
+        STAGE0["validation_report"],
+        STAGE1["master_table"],
+        STAGE1["master_schema"],
+        STAGE1["mutation_frequency_map"],
+        STAGE1["mutation_combination_map"],
+        STAGE1["hiv_prevalence_prior"],
+        STAGE1["hiv_drug_selected_prior"],
+        STAGE1["background_prior"],
+        STAGE1["background_prior_by_tissue"],
+        STAGE1["drug_selected_prior"],
+        STAGE1["observed_combo_prior"],
+        STAGE1["global_prior"],
+        STAGE1["benchmark_prior_blind"],
+        STAGE1["stage1_build_qc"],
+        STAGE1["hiv_prior_qc"],
+        STAGE1["mutation_prior_qc"],
+        STAGE1_5["summary_report"],
+        *STAGE1_5_TARGET_JSONS,
+        CASES_FROZEN_PATH,
+        STAGE2["domain_filter_report"],
+        STAGE2["rt_domain_extraction_report"],
+        STAGE2["rt_pocket_similarity_report"],
+        STAGE2["hiv_nnrti_structure_qc"],
+        STAGE2["combo_panel"],
+        STAGE2["site_pool_report"],
+        STAGE2["mutation_pool_report"],
+        STAGE2["case_selection_qc"],
+        *CASE_MANIFEST_PATHS,
+        STAGE3["extraction_source_report"],
+        STAGE3["set_n_attempt_report"],
+        STAGE3["missing_samples_report"],
+        STAGE3["modeling_queue_report"],
+        STAGE3["excluded_samples_report"],
+        STAGE3["extraction_qc"],
+        *STAGE3_2_RESIDUE_MAPS,
+        *STAGE3_2_RESIDUE_QCS,
+        *STAGE3_2_MUTATION_STATUS,
+        *STAGE3_2_COMPONENT_STATUS,
+        *STAGE3_2_HIV_QC,
+        *STAGE3_2_EXCLUDED,
+        STAGE3_5["summary_report"],
+        *STAGE3_5_WT_COMPLEX,
+        *STAGE3_5_WT_IFP,
+        *STAGE3_5_ANCHORS,
+        *STAGE3_5_POSE_STATS,
+        *STAGE3_5_DOCKING_BOX,
+        *STAGE3_5_WATER_REPORT,
+        *STAGE3_5_HIV_QC,
+        STAGE4["summary_report"],
+        *STAGE4_MUTATION_RANK,
+        *STAGE4_RESIDUE_RISK,
+        *STAGE4_STORY,
+        *STAGE4_STORY_INPUT,
+        *STAGE4_STORY_PAYLOAD,
+        *STAGE4_CONSERVATION,
+        *STAGE4_COMBO_RANK,
+        *STAGE4_CASE_QC,
+        *STAGE4_CASE_MANIFEST,
+        *STAGE4_CASE_STATE,
+        *STAGE5_DOCKING,
+        *STAGE5_TARGET_PANEL,
+        *STAGE5_HIV_POSE_QC,
+        *STAGE5_IFP_DIFF,
+        *STAGE5_EFFECTS,
+        *STAGE5_COMBO_EFFECTS,
+        *STAGE5_STORY_INPUT,
+        *STAGE5_STORY_PAYLOAD,
+        *STAGE5_STORY,
+        *STAGE5_CASE_QC,
+        STAGE5_CLUSTERS,
+        STAGE5_CALIBRATION,
+        STAGE5_CALIBRATION_PLOT,
+        STAGE5["summary_report"],
+
+
+rule data_audit:
+    output:
+        STAGE0["file_manifest"],
+        STAGE0["data_audit"],
+    threads: 1
+    resources:
+        gpu=0,
+        mem_mb=2048,
+    shell:
+        f'"{PYTHON_BIN}" scripts/00_data_audit.py --config configs/base.yaml'
+
+
+rule system_audit:
+    output:
+        STAGE0["system_audit"],
+    threads: 1
+    resources:
+        gpu=0,
+        mem_mb=1024,
+    shell:
+        f'"{PYTHON_BIN}" scripts/00b_system_audit.py --config configs/base.yaml'
+
+
+rule archive_index:
+    output:
+        STAGE0["alias_map"],
+        STAGE0["archive_magic_report"],
+        STAGE0["archive_index"],
+    threads: 1
+    resources:
+        gpu=0,
+        mem_mb=4096,
+    shell:
+        f'"{PYTHON_BIN}" scripts/03a_build_archive_index.py --config configs/base.yaml'
+
+
+rule init_stage0:
+    input:
+        STAGE0["data_audit"],
+        STAGE0["system_audit"],
+        STAGE0["alias_map"],
+        STAGE0["archive_magic_report"],
+        STAGE0["archive_index"],
+        "workflows/Snakefile",
+        "schemas/run_manifest.schema.json",
+        "schemas/state.schema.json",
+    output:
+        f"outputs/{PROJECT_ID}/run_manifest.json",
+        f"outputs/{PROJECT_ID}/state.json",
+    threads: 1
+    resources:
+        gpu=0,
+        mem_mb=1024,
+    shell:
+        f'"{PYTHON_BIN}" scripts/00c_initialize_stage0.py --config configs/base.yaml'
+
+
+rule validate_stage0:
+    input:
+        STAGE0["file_manifest"],
+        STAGE0["data_audit"],
+        STAGE0["system_audit"],
+        STAGE0["alias_map"],
+        STAGE0["archive_magic_report"],
+        STAGE0["archive_index"],
+        f"outputs/{PROJECT_ID}/run_manifest.json",
+        f"outputs/{PROJECT_ID}/state.json",
+        "schemas/run_manifest.schema.json",
+        "schemas/state.schema.json",
+    output:
+        STAGE0["validation_report"],
+    threads: 1
+    resources:
+        gpu=0,
+        mem_mb=1024,
+    shell:
+        f'"{PYTHON_BIN}" scripts/00d_validate_stage0.py --config configs/base.yaml'
+
+
+rule build_stage1_tables:
+    input:
+        STAGE0["validation_report"],
+        STAGE1["mdrdb_main"],
+        STAGE1["mdrdb_drug_annotation_zip"],
+        STAGE1["mdrdb_protein_annotation_zip"],
+        STAGE1["cosmic_resistance_tar"],
+        STAGE1["depmap_mutations_csv"],
+        STAGE1["depmap_model_csv"],
+    output:
+        STAGE1["master_table"],
+        STAGE1["master_schema"],
+        STAGE1["mutation_frequency_map"],
+        STAGE1["mutation_combination_map"],
+        STAGE1["stage1_build_qc"],
+    threads: 1
+    resources:
+        gpu=0,
+        mem_mb=8192,
+    shell:
+        f'"{PYTHON_BIN}" scripts/01_build_tables.py --config configs/base.yaml'
+
+
+rule build_hiv_priors:
+    input:
+        STAGE0["validation_report"],
+        STAGE1["mdrdb_main"],
+        STAGE1["hiv_rt_raw"],
+        STAGE1["hiv_pr_raw"],
+        STAGE1["hiv_in_raw"],
+        STAGE1["hiv_ref_raw"],
+    output:
+        STAGE1["hiv_prevalence_prior"],
+        STAGE1["hiv_drug_selected_prior"],
+        STAGE1["hiv_prevalence_cache_tsv"],
+        STAGE1["hiv_drug_selected_cache_tsv"],
+        STAGE1["hiv_prior_qc"],
+    threads: 1
+    resources:
+        gpu=0,
+        mem_mb=4096,
+    shell:
+        f'"{PYTHON_BIN}" scripts/01b_fetch_pathogen_priors.py --config configs/base.yaml'
+
+
+rule fetch_stage1_5_assets:
+    input:
+        *STAGE1_5_PROJECT_CONFIGS,
+    output:
+        STAGE1_5["summary_report"],
+        *STAGE1_5_TARGET_JSONS,
+    threads: 1
+    resources:
+        gpu=0,
+        mem_mb=2048,
+    shell:
+        f'"{PYTHON_BIN}" scripts/01c_fetch_public_assets.py --config configs/base.yaml'
+
+
+rule select_stage2_cases:
+    input:
+        STAGE1["master_table"],
+        STAGE1["global_prior"],
+        STAGE1["observed_combo_prior"],
+        STAGE1["mutation_combination_map"],
+        STAGE1_5["summary_report"],
+        *STAGE1_5_TARGET_JSONS,
+        CASES_SEED_PATH,
+    output:
+        CASES_FROZEN_PATH,
+        STAGE2["domain_filter_report"],
+        STAGE2["rt_domain_extraction_report"],
+        STAGE2["rt_pocket_similarity_report"],
+        STAGE2["hiv_nnrti_structure_qc"],
+        STAGE2["combo_panel"],
+        STAGE2["site_pool_report"],
+        STAGE2["mutation_pool_report"],
+        STAGE2["case_selection_qc"],
+        *CASE_MANIFEST_PATHS,
+    threads: 1
+    resources:
+        gpu=0,
+        mem_mb=4096,
+    shell:
+        f'"{PYTHON_BIN}" scripts/02_select_cases.py --config configs/base.yaml'
+
+
+rule build_stage1_priors:
+    input:
+        STAGE1["master_table"],
+        STAGE1["mutation_frequency_map"],
+        STAGE1["mutation_combination_map"],
+        STAGE1["hiv_prevalence_prior"],
+        STAGE1["hiv_drug_selected_prior"],
+        CASES_SEED_PATH,
+    output:
+        STAGE1["background_prior"],
+        STAGE1["background_prior_by_tissue"],
+        STAGE1["drug_selected_prior"],
+        STAGE1["observed_combo_prior"],
+        STAGE1["global_prior"],
+        STAGE1["benchmark_prior_blind"],
+        STAGE1["mutation_prior_qc"],
+    threads: 1
+    resources:
+        gpu=0,
+        mem_mb=6144,
+    shell:
+        f'"{PYTHON_BIN}" scripts/04_build_mutation_priors.py --config configs/base.yaml'
+
+
+rule extract_stage3_samples:
+    input:
+        CASES_FROZEN_PATH,
+        STAGE1["master_table"],
+        STAGE2["hiv_nnrti_structure_qc"],
+        STAGE2["rt_domain_extraction_report"],
+        STAGE2["mutation_pool_report"],
+        STAGE0["archive_index"],
+        *CASE_MANIFEST_PATHS,
+        *CASE_SAMPLE_LIST_PATHS,
+    output:
+        STAGE3["extraction_source_report"],
+        STAGE3["set_n_attempt_report"],
+        STAGE3["missing_samples_report"],
+        STAGE3["modeling_queue_report"],
+        STAGE3["excluded_samples_report"],
+        STAGE3["extraction_qc"],
+    threads: 1
+    resources:
+        gpu=0,
+        mem_mb=8192,
+    shell:
+        f'"{PYTHON_BIN}" scripts/03_extract_samples.py --config configs/base.yaml'
+
+
+rule build_stage3_residue_maps:
+    input:
+        CASES_FROZEN_PATH,
+        STAGE3["extraction_source_report"],
+        STAGE3["excluded_samples_report"],
+        STAGE3["modeling_queue_report"],
+        STAGE2["rt_domain_extraction_report"],
+        STAGE3_2["sifts_chain_uniprot_tsv"],
+        STAGE3_2["sifts_observed_segments_tsv"],
+        *STAGE1_5_TARGET_JSONS,
+    output:
+        *STAGE3_2_RESIDUE_MAPS,
+        *STAGE3_2_RESIDUE_QCS,
+        *STAGE3_2_MUTATION_STATUS,
+        *STAGE3_2_COMPONENT_STATUS,
+        *STAGE3_2_HIV_QC,
+        *STAGE3_2_EXCLUDED,
+    threads: 1
+    resources:
+        gpu=0,
+        mem_mb=8192,
+    shell:
+        f'"{PYTHON_BIN}" scripts/03b_build_residue_map.py --config configs/base.yaml'
+
+
+rule build_stage3_5_baselines:
+    input:
+        CASES_FROZEN_PATH,
+        *STAGE1_5_TARGET_JSONS,
+        *STAGE3_2_RESIDUE_MAPS,
+    output:
+        STAGE3_5["summary_report"],
+        *STAGE3_5_WT_COMPLEX,
+        *STAGE3_5_WT_IFP,
+        *STAGE3_5_ANCHORS,
+        *STAGE3_5_POSE_STATS,
+        *STAGE3_5_DOCKING_BOX,
+        *STAGE3_5_WATER_REPORT,
+        *STAGE3_5_HIV_QC,
+    threads: 1
+    resources:
+        gpu=0,
+        mem_mb=8192,
+    shell:
+        f'"{PYTHON_BIN}" scripts/05_prepare_complex.py --config configs/base.yaml'
+
+
+rule build_stage4_rankings:
+    input:
+        CASES_FROZEN_PATH,
+        STAGE1["master_table"],
+        STAGE2["site_pool_report"],
+        STAGE2["combo_panel"],
+        STAGE3["extraction_source_report"],
+        *STAGE3_2_RESIDUE_MAPS,
+        *STAGE3_2_MUTATION_STATUS,
+        STAGE3_5["summary_report"],
+        *STAGE3_5_WT_COMPLEX,
+        *STAGE3_5_WT_IFP,
+        *STAGE3_5_ANCHORS,
+    output:
+        STAGE4["summary_report"],
+        *STAGE4_MUTATION_RANK,
+        *STAGE4_RESIDUE_RISK,
+        *STAGE4_STORY,
+        *STAGE4_STORY_INPUT,
+        *STAGE4_STORY_PAYLOAD,
+        *STAGE4_CONSERVATION,
+        *STAGE4_COMBO_RANK,
+        *STAGE4_CASE_QC,
+        *STAGE4_CASE_MANIFEST,
+        *STAGE4_CASE_STATE,
+    threads: 1
+    resources:
+        gpu=0,
+        mem_mb=16384,
+    shell:
+        f'"{PYTHON_BIN}" scripts/04c_build_mutation_rankings.py --config configs/base.yaml'
+
+
+rule run_stage5_docking:
+    input:
+        CASES_FROZEN_PATH,
+        *STAGE4_MUTATION_RANK,
+        *STAGE4_COMBO_RANK,
+        *STAGE3_2_MUTATION_STATUS,
+        *STAGE3_5_ANCHORS,
+    output:
+        *STAGE5_DOCKING,
+        *STAGE5_TARGET_PANEL,
+        *STAGE5_HIV_POSE_QC,
+    threads: 1
+    resources:
+        gpu=0,
+        mem_mb=16384,
+    shell:
+        f'"{PYTHON_BIN}" scripts/06_run_docking.py --config configs/base.yaml'
+
+
+rule compute_stage5_ifp:
+    input:
+        *STAGE5_DOCKING,
+        *STAGE5_HIV_POSE_QC,
+        *STAGE3_5_ANCHORS,
+    output:
+        *STAGE5_IFP_DIFF,
+    threads: 1
+    resources:
+        gpu=0,
+        mem_mb=8192,
+    shell:
+        f'"{PYTHON_BIN}" scripts/07_compute_ifp.py --config configs/base.yaml'
+
+
+rule finalize_stage5_effects:
+    input:
+        CASES_FROZEN_PATH,
+        *STAGE5_DOCKING,
+        *STAGE5_IFP_DIFF,
+        STAGE1["mdrdb_main"],
+    output:
+        *STAGE5_EFFECTS,
+        *STAGE5_COMBO_EFFECTS,
+        *STAGE5_STORY_INPUT,
+        *STAGE5_STORY_PAYLOAD,
+        *STAGE5_STORY,
+        *STAGE5_CASE_QC,
+        STAGE5_CLUSTERS,
+        STAGE5_CALIBRATION,
+        STAGE5_CALIBRATION_PLOT,
+        STAGE5["summary_report"],
+    threads: 1
+    resources:
+        gpu=0,
+        mem_mb=12288,
+    shell:
+        f'"{PYTHON_BIN}" scripts/08b_calibrate_scoring.py --config configs/base.yaml'

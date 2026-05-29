@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ResistAgent Run Manifest",
+  "type": "object",
+  "required": [
+    "project_id",
+    "stage",
+    "git_commit",
+    "software_versions",
+    "env_snapshot",
+    "random_seeds",
+    "input_hashes",
+    "commands",
+    "started_at",
+    "finished_at"
+  ],
+  "properties": {
+    "project_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stage": {
+      "type": "string",
+      "minLength": 1
+    },
+    "git_commit": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "git_status": {
+      "type": "string"
+    },
+    "software_versions": {
+      "type": "object"
+    },
+    "env_snapshot": {
+      "type": "object",
+      "required": [
+        "kind",
+        "content"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "random_seeds": {
+      "type": "object"
+    },
+    "input_hashes": {
+      "type": "object"
+    },
+    "commands": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "started_at": {
+      "type": "string"
+    },
+    "finished_at": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": true
+}

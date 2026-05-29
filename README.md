@@ -11,8 +11,6 @@ This repository contains the core source code only:
 - `scripts/`: execution scripts for data audit, case selection, public-asset retrieval, mutation-prior construction, structural preparation, docking/IFP processing, model calibration, counter-design, and validation summaries.
 - `configs/`, `schemas/`, `workflows/`, and `tests/`: configuration templates, validation schemas, the Snakemake entry point, and unit tests.
 
-Generated figures, manuscripts, paper-preparation scripts, raw data, local outputs, and analysis reports are intentionally excluded.
-
 ## Requirements
 
 Install the Python dependencies listed in `requirements.txt`. Some optional structural and physics routines require external command-line tools such as AutoDock Vina, PLIP, OpenMM-compatible force-field assets, and local structure-preparation utilities.
